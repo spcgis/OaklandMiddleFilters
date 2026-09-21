@@ -1,0 +1,57 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e783d29c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import plotly.graph_objects as go\n",
+    "\n",
+    "# 1. Load the Excel file\n",
+    "excel_file = \"C:\\\\Users\\\\Chris\\\\OneDrive - SOUTHWESTERN PENNSYLVANIA CORPORATION\\\\Desktop\\\\Python_Workspace\\\\2082713_Oakland_Middle_Filters_2\\\\2082713_Oakland_Middle_Filters_mf_traveler_trip_purpose_all.xlsx\"  # Change to your filename\n",
+    "sheet_name = \"Sheet2\"     # Change to your sheet name\n",
+    "df = pd.read_excel(excel_file, sheet_name=sheet_name)\n",
+    "\n",
+    "# 2. Get a unique list of all nodes (Sources and Targets combined)\n",
+    "all_nodes = list(pd.concat([df['Source'], df['Target']]).unique())\n",
+    "\n",
+    "# 3. Map the names to unique index integer IDs (required by Plotly)\n",
+    "node_mapping = {name: index for index, name in enumerate(all_nodes)}\n",
+    "df['source_idx'] = df['Source'].map(node_mapping)\n",
+    "df['target_idx'] = df['Target'].map(node_mapping)\n",
+    "\n",
+    "# 4. Construct the Sankey Diagram\n",
+    "fig = go.Figure(data=[go.Sankey(\n",
+    "    node = dict(\n",
+    "      pad = 15,\n",
+    "      thickness = 20,\n",
+    "      line = dict(color = \"black\", width = 0.5),\n",
+    "      label = all_nodes,\n",
+    "      color = \"blue\"  # You can customize node colors here\n",
+    "    ),\n",
+    "    link = dict(\n",
+    "      source = df['source_idx'],\n",
+    "      target = df['target_idx'],\n",
+    "      value = df['Value'],\n",
+    "      hovertemplate = 'Flow: %{source.label} → %{target.label}<br>Value: %{value}<extra></extra>'\n",
+    "  ))])\n",
+    "\n",
+    "# 5. Save the output as a standalone interactive HTML file\n",
+    "fig.update_layout(title_text=\"Excel-Sankey Flow Chart\", font_size=12)\n",
+    "fig.write_html(\"sankey_chart.html\")\n",
+    "\n",
+    "print(\"Success! Open 'sankey_chart.html' in any web browser.\")\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "language_info": {
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
